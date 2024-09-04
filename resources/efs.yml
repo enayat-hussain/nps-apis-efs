@@ -1,0 +1,133 @@
+Resources:
+  EfsFileSystem:
+    Type: AWS::EFS::FileSystem
+    Properties:
+      PerformanceMode: generalPurpose
+      Encrypted: true
+      FileSystemTags:
+        - Key: Name
+          Value: nps_dev_node_modules_efs
+  AccessPoint:
+    Type: AWS::EFS::AccessPoint
+    Properties:
+      FileSystemId:
+        Ref: EfsFileSystem
+      PosixUser:
+        Uid: "1001"
+        Gid: "1001"
+      RootDirectory:
+        CreationInfo:
+          OwnerGid: "1001"
+          OwnerUid: "1001"
+          Permissions: "777"
+        Path: /efs
+  MountTarget:
+    Type: AWS::EFS::MountTarget
+    Properties:
+      FileSystemId:
+        Ref: EfsFileSystem
+      SubnetId: ${self:custom.subnetsId}
+      SecurityGroups:
+        - ${self:custom.securityGroup}
+
+  EC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-08c40ec9ead489470
+      InstanceType: t2.micro
+      SecurityGroupIds:
+        - ${self:custom.securityGroup}
+      SubnetId: ${self:custom.subnetsId}
+      # use EfsFileSystem id to mount the EFS file system
+
+      UserData:
+        Fn::Base64: !Sub |
+          ${file(./resources/cloud-configs.sh)}
+          #!/bin/bash -xe
+          sudo su
+          apt-get update -y
+          apt-get install -y nfs-common
+          mkdir -p /mnt/efs
+          mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport ${EfsFileSystem.FileSystemId}.efs.us-east-1.amazonaws.com:/ /mnt/efs
+          echo "${EfsFileSystem.FileSystemId}.efs.us-east-1.amazonaws.com:/ /mnt/efs nfs4 nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport 0 0" >> /etc/fstab
+          echo "after mounting"
+          apt install npm -y
+          echo "-----BEGIN OPENSSH PRIVATE KEY-----" > /mnt/efs/id_rsa
+          echo "b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAABlwAAAAdzc2gtcn" >> /mnt/efs/id_rsa
+          echo "NhAAAAAwEAAQAAAYEAlt28NHWkji20ELzowEOq11Oat1hLOoAPnBKYjcvcV4GZk/TO7aQb" >> /mnt/efs/id_rsa
+          echo "s8Eudb02OIM0zbskq5KEFNvsMZXN+3BJXn6Ntrj1oHFOGJcOEchfgkzDHoE/oSm31o03qB" >> /mnt/efs/id_rsa
+          echo "iT2lfQZ6q9mtYnIxUCWX4iVptVBY57NRctgVYdTr9VK1oQSrn918i2kWdhryAnH5ihnVBL" >> /mnt/efs/id_rsa
+          echo "q4L2R7wSJT+aEXeL1BN4n9zEpSunyTpPUN/v/UVGgrov6HrYPOGgham/8A+Xjs9fMscLVB" >> /mnt/efs/id_rsa
+          echo "waDC4Q/OXK47csz+Iv0zYwNkRktYuu5YE10X3CQlPMNzs5yEzQgLQsRAlIZMYw8GDlAdad" >> /mnt/efs/id_rsa
+          echo "jNQlCq690els6WzoOKVEj1zEz5miMu66r1Ji+a9FciNP5lVcF62F5zgS1a2s5U08wXee4G" >> /mnt/efs/id_rsa
+          echo "GxP7buptD/ydSDk19XoU0r244csvWT3Azghqiufqxk83q+CiJmXDUqYV6rAACpFr6fJq67" >> /mnt/efs/id_rsa
+          echo "5hhbQGmgBX/kj9PXZIkC7ZEbVHpsBQfJ9SuviBU1AAAFoN/X0yTf19MkAAAAB3NzaC1yc2" >> /mnt/efs/id_rsa
+          echo "EAAAGBAJbdvDR1pI4ttBC86MBDqtdTmrdYSzqAD5wSmI3L3FeBmZP0zu2kG7PBLnW9NjiD" >> /mnt/efs/id_rsa
+          echo "NM27JKuShBTb7DGVzftwSV5+jba49aBxThiXDhHIX4JMwx6BP6Ept9aNN6gYk9pX0GeqvZ" >> /mnt/efs/id_rsa
+          echo "rWJyMVAll+IlabVQWOezUXLYFWHU6/VStaEEq5/dfItpFnYa8gJx+YoZ1QS6uC9ke8EiU/" >> /mnt/efs/id_rsa
+          echo "mhF3i9QTeJ/cxKUrp8k6T1Df7/1FRoK6L+h62DzhoIWpv/APl47PXzLHC1QcGgwuEPzlyu" >> /mnt/efs/id_rsa
+          echo "O3LM/iL9M2MDZEZLWLruWBNdF9wkJTzDc7OchM0IC0LEQJSGTGMPBg5QHWnYzUJQquvdHp" >> /mnt/efs/id_rsa
+          echo "bOls6DilRI9cxM+ZojLuuq9SYvmvRXIjT+ZVXBethec4EtWtrOVNPMF3nuBhsT+27qbQ/8" >> /mnt/efs/id_rsa
+          echo "nUg5NfV6FNK9uOHLL1k9wM4Iaorn6sZPN6vgoiZlw1KmFeqwAAqRa+nyauu+YYW0BpoAV/" >> /mnt/efs/id_rsa
+          echo "5I/T12SJAu2RG1R6bAUHyfUrr4gVNQAAAAMBAAEAAAGAAe3X6DvQ3NiMwuIHf93do184TT" >> /mnt/efs/id_rsa
+          echo "vdymO0z2QVe0quCJhppFCvDK7ag9Pmii7fMJ3M4QyRjXgUJEgjnwaxWZO3/HNV0I5Q5bpN" >> /mnt/efs/id_rsa
+          echo "K1dTILsVLY9Zt1wjuiXUafPoUEfwLAyPZ6PxRLeUTIiKPSa1vbHCxo1p2eXv+QVm3ojnx+" >> /mnt/efs/id_rsa
+          echo "Qg7TOvoUC5xOYzg4+/sFG9T0uljA3ipEwtVziW+b4zlYSiODkUcqA6RwJt3TTf1rc6DZXf" >> /mnt/efs/id_rsa
+          echo "4vMfLLgd21euUp2AbJ0OL4sda1hGrBYLfIt3EafQ3WI6pYUWOs4DsRIVnFkh62r+X2MfsZ" >> /mnt/efs/id_rsa
+          echo "CKZpTfOnCEjd26YLyQNNiF1YTbcepyBlGkZ3NeeYLx3rEIDt3Dx2hC1Xkuzcjo5x38gk4W" >> /mnt/efs/id_rsa
+          echo "nYaUJWBBIio5ubpwxn3uD/MjHKAuoNL/k/qoSInCXtxzK0xrB3iGEBm3FqPYbfuspKQHQB" >> /mnt/efs/id_rsa
+          echo "pAQsmWpceV6kAmPbkAKRy4SWZd+5yC1b0c0fMhxclnD+jTgUoVOU9J11L/jzQLUxoBAAAA" >> /mnt/efs/id_rsa
+          echo "wFwp2bdZXsO1irex5EVhv/pC8Yyata3/OtekSzM6PngIhIqTyyK+aTY86sdwKh5dvtZmLU" >> /mnt/efs/id_rsa
+          echo "bRMTKLR4O4I7cByywVq0+9KWe5eT7NevWB0mcihpJ6ldD4lodU0w/L/nz2UjGg6f52Zzmt" >> /mnt/efs/id_rsa
+          echo "J0xf04DcfuUKVacs66wJ6cq6NYmfarrhuPPHoL4qtFphdqqeOc0jflEzk+ON9RIwferQ+R" >> /mnt/efs/id_rsa
+          echo "kf8DTNZ04RgXnq7Crtz0bcEwi8iJuI/63JPmUE0tRtIJ9DtQAAAMEAyMuxDAred11qLEdd" >> /mnt/efs/id_rsa
+          echo "B3wtzNqUrdG7sjUYeRIstpUYgy/OYFTH7dOanYh/GjjHUud8wsnpqSFG6u33KzGVz9D/gq" >> /mnt/efs/id_rsa
+          echo "sNRAyR5mCYFKuGPXoW64IeyAKCQt3DZ9iBeTmvfSFcjpP48SMqjo2zrn2E34o+DZeyRlq2" >> /mnt/efs/id_rsa
+          echo "RnyDYIhiZQGN0N5G3woYvt2lk39HRDcECh5JpgBzpYbBE9J8Cvf/IYnVeT03XFcuFxL++r" >> /mnt/efs/id_rsa
+          echo "DwHe6p0KP4NiH7unn73SiK63KvgC91AAAAwQDAV+1jCx4kyXNQBc1xCfV7Du20cVy4h4JI" >> /mnt/efs/id_rsa
+          echo "JtF6dORRFJWs/q/C6v4jC9xNgmwoCKu4TdyJn1VeywdKc4hGk5gYUytxntiSJUjrxwrj+2" >> /mnt/efs/id_rsa
+          echo "wzQcF9FtjDYJdV3v4zT7Ur1ouV70jzw8mJ2tw0NuAIY5eMDMiabuAPPqxOFUS9VoPNucDd" >> /mnt/efs/id_rsa
+          echo "Jv5dqbXPFQy1D2DfIHe9YamW1tRGMjgpMttpolYqfoluuHyDKxQxUJEvjPAUO/rLuOUiF+" >> /mnt/efs/id_rsa
+          echo "oqDz5djDzHVsEAAAAlbWFjYm9va3Byb0BNYWNib29rcy1NYWNCb29rLVByby5sb2NhbAEC" >> /mnt/efs/id_rsa
+          echo "AwQFBg==" >> /mnt/efs/id_rsa
+          echo "-----END OPENSSH PRIVATE KEY-----" >> /mnt/efs/id_rsa
+          echo "|1|PWhPBzk8QMo3hYRASN547NLejKA=|H9KtllmRC+kCBZ2/uVpUgp0yrOE= ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl" > /mnt/efs/known_hosts
+          chmod -R 400 /mnt/efs/id_rsa
+          chmod -R 644 /mnt/efs/known_hosts
+          eval `ssh-agent`
+          ssh-add /mnt/efs/id_rsa
+          if [ ! -d "/mnt/efs/nps-apis" ]; then
+            if [ "dev" = "dev" ]; then
+                git clone -b development git@github.com:OXIT-LLC/nps-apis.git /mnt/efs/nps-apis
+            elif [ "$STAGE" = "qa" ]; then
+                git clone -b qa git@github.com:OXIT-LLC/nps-apis.git /mnt/efs/nps-apis
+            elif [ "$STAGE" = "prod" ]; then
+                git clone -b master git@github.com:OXIT-LLC/nps-apis.git /mnt/efs/nps-apis
+            fi
+          fi
+
+          npm install --prefix /mnt/efs/nps-apis
+          echo "Done"
+          --//--
+
+      Tags:
+        - Key: Name
+          Value: nps_dev_node_modules
+    DependsOn:
+      - EfsFileSystem
+      - AccessPoint
+      - MountTarget
+
+Outputs:
+  EfsFileSystemId:
+    Value:
+      Ref: EfsFileSystem
+    Export:
+      Name: EfsFileSystemId
+
+  # mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport fs-02a57eed18a03bec2.efs.us-east-1.amazonaws.com:/ efs
+  # mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2 ${EfsFileSystem.DNSName}:/ /mnt/efs
+  # mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2 ${self:custom.efsDNS}:/ /efs
+  # sudo mount -t nfs -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport mount-target-DNS:/   ~/efs-mount-point
+  # sudo mount -t nfs -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport mount-target-ip:/  ~/efs-mount-point
+  # aws ec2 run-instances --image-id ami-08c40ec9ead489470 --count 1 --instance-type t2.micro --key-name nps-dev --security-group-ids sg-02dce16c9325adbbc --subnet-id subnet-6c375f4d --associate-public-ip-address --user-data file://user-data.txt --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=serverless-efs-test}]'

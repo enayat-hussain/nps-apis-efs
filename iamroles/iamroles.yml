@@ -1,0 +1,17 @@
+statements:
+  - Effect: Allow
+    Action:
+      - s3:GetObject
+      - s3:PutObject
+      - iam:CreateServiceLinkedRole
+      - cloudwatch:DescribeAlarmsForMetric
+      - cloudwatch:GetMetricData
+      - ec2:*
+      - elasticfilesystem:*
+      - kms:DescribeKey
+      - kms:ListAliases
+    Resource: "*"
+  - Effect: Allow
+    Action:
+      - logs:*
+    Resource: arn:aws:logs:*:*:*
