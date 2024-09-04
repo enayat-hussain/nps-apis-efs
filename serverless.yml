@@ -1,0 +1,48 @@
+service: serverless-efs-test
+
+custom:
+  subnetsId: subnet-6c375f4d
+  securityGroup: sg-02dce16c9325adbbc
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  stage: dev
+  region: us-east-1
+
+  iam:
+    role: ${file(iamroles/iamroles.yml)}
+
+  environment:
+    NODE_PATH: /mnt/efs/node_modules
+
+package:
+  exclude:
+    - node_modules/**
+
+# Transform: AWS::Serverless-2016-10-31
+resources:
+  - ${file(resources/efs.yml)}
+
+functions:
+  hello:
+    handler: handler.hello
+    fileSystemConfig:
+      arn:
+        Fn::GetAtt:
+          - AccessPoint
+          - Arn
+      localMountPath: /mnt/efs
+    vpc:
+      securityGroupIds:
+        - ${self:custom.securityGroup}
+      subnetIds:
+        - ${self:custom.subnetsId}
+    events:
+      - http:
+          path: hello
+          method: get
+    dependsOn:
+      - MountTarget
+# plugins:
+#   - serverless-offline

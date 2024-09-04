@@ -1,0 +1,21 @@
+{
+  "name": "serverless-tutorial-rds",
+  "version": "1.0.0",
+  "description": "",
+  "main": "handler.js",
+  "scripts": {
+    "deploy": "AWS_PROFILE=nps-dev sls deploy",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon --exec \"serverless offline\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "moment": "^2.29.4",
+    "serverless": "^3.25.0"
+  },
+  "devDependencies": {
+    "serverless-offline": "^11.4.0"
+  }
+}
