@@ -1,8 +1,8 @@
 service: serverless-efs-test
 
 custom:
-  subnetsId: subnet-6c37556d
-  securityGroup: sg-02dce16c9326dnbae
+  subnetsId: subnet-324adasd
+  securityGroup: sg-234fsfsdf34423
 
 provider:
   name: aws
